@@ -1,0 +1,24 @@
+#!/usr/bin/perl
+
+$minimum = 0;
+$maximum = 99;
+
+$start = `date +%s`;
+# prepare array
+@answers;
+$length = $maximum - $minimum;
+for($i = 0; $i <= $maximum - $minimum; $i++) {
+    $answers[$i] = $minimum + $i;
+}
+
+print "<question> (<left>)\n";
+print "<Enter> to continue\n";
+while($#answers >= 0) {
+    $pos = int rand($#answers);
+    print "$answers[$pos] ($#answers)";
+    $answers[$pos] = $answers[$#answers];
+    delete($answers[$#answers]);
+    <STDIN>;
+}
+
+print "Time: " . (`date +%s` - $start) . "\n";
