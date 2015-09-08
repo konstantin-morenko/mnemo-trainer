@@ -1,0 +1,31 @@
+#!/usr/bin/perl
+
+$minimum = 1;
+$maximum = 25;
+
+# prepare array
+@answers;
+
+$length = $maximum - $minimum;
+for($i = 0; $i <= $maximum - $minimum; $i++) {
+    $answers[$i] = $minimum + $i;
+}
+
+$col = -1;
+$col_max = 4;
+
+while($#answers >= 0) {
+    $pos = int rand($#answers);
+    if($col < $col_max) {
+	$col++;
+    }
+    else {
+	print "\n";
+	$col = 0;
+    }
+    printf (" %2d", "$answers[$pos]");
+    $answers[$pos] = $answers[$#answers];
+    delete($answers[$#answers]);
+}
+
+
