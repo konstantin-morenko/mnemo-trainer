@@ -1,30 +1,35 @@
 #!/usr/bin/perl
 
-$minimum = 0;
-$maximum = 9;
+$minimum = 10;
+$maximum = 19;
 
 $begin = `date +%s`;
 $start = `date +%s`;
 # prepare array
-@answers;
+@tasks;
 # @answers = ('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z');
 $length = $maximum - $minimum;
+@averageTimes, @counts;
 for($i = 0; $i <= $maximum - $minimum; $i++) {
-    $answers[$i] = $minimum + $i;
+    # $tasks[$i] = $minimum + $i;
+    $averageTimes[$i] = 1;
+    $counts[$i] = 1;
 }
 
-@averageTimes, @counts;
+print "Input journal file name: ";
+$name = <STDIN>;
+$name =~ s/\n//;
+$journal = $name . ".journal";
+open (jFile, "<", "$journal") or die "Can't open file $journal\n";
+foreach my $task (<jFile>) {$task =~ s/\n//; push(@tasks, $task);}
 
+normalize();
+prepareQuestions();
+ready();
 while(true) {
-
     answering();
-
-    #normalisation
     normalize();
-    
-    #prepare new array
     prepareQuestions();
-
     restBreak();
 }
 
@@ -38,14 +43,15 @@ sub addTimes {
 sub answering {
     print "<question> (<left>)\n";
     print "<Enter> to continue\n";
-    while($#answers >= 0) {
-	$pos = int rand($#answers);
-	print "$answers[$pos] ($#answers)";
+    while($#questions >= 0) {
+	$pos = int rand($#questions);
+	print "[$#questions] ";
+	print "$tasks[$questions[$pos]]";
 	$start = `date +%s`;
 	<STDIN>;
-	addTimes($answers[$pos], `date +%s` - $start);
-	$answers[$pos] = $answers[$#answers];
-	delete($answers[$#answers]);
+	addTimes($questions[$pos], `date +%s` - $start);
+	$questions[$pos] = $questions[$#answers];
+	delete($questions[$#answers]);
     }
 }
 
@@ -54,20 +60,20 @@ sub normalize {
 	if($_ < 1) {$_ = 1;}
 	if($_ > 10) {$_ = 10;}
     }
-    print "(@averageTimes)\n";
 }
 
 sub prepareQuestions {
-    @answers = ();
+    @questions = ();
     @counts = ();
-    my($sum);
+    my $sum = 0;
+    my $max = 0;
     for($j = 0; $j <= $#averageTimes; $j++) {
-	#    print "[$j] $times[$j]\n";
-	for($i = 0; $i < $averageTimes[$j]; $i++) {push(@answers, $j);}
+	for($i = 0; $i < $averageTimes[$j]; $i++) {push(@questions, $j);}
 	$sum += $averageTimes[$j];
+	if($averageTimes[$j] > $max) {$max = $averageTimes[$j];}
     }
-    print "[@answers] ";
-    printf ("%2.1f\n", ($sum/$#averageTimes + 1));
+    $avr = $sum / ($#averageTimes + 1);
+    printf ("[%2.1f/%1d]\n", $avr, $max);
     @averageTimes = ();
     $time = `date +%s` - $begin;
     print "Time: $time\n";
@@ -75,11 +81,12 @@ sub prepareQuestions {
 
 sub restBreak {
     my $pause = 30;
-    my $delay = 5;
-    for(; $pause > 0; $pause -= $delay) {
-	print "Have a rest break for " . $pause . " s.\n";
-	sleep($delay);
-    }
-    print "\nBegin?\n";
+    print "Have a rest break for $pause s.\n";
+    sleep ($pause);
+    ready();
+}
+
+sub ready {
+    print "Ready?\n";
     <STDIN>;
 }
