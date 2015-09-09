@@ -1,8 +1,9 @@
 #!/usr/bin/perl
 
 $minimum = 0;
-$maximum = 99;
+$maximum = 9;
 
+$begin = `date +%s`;
 $start = `date +%s`;
 # prepare array
 @answers;
@@ -12,14 +13,73 @@ for($i = 0; $i <= $maximum - $minimum; $i++) {
     $answers[$i] = $minimum + $i;
 }
 
-print "<question> (<left>)\n";
-print "<Enter> to continue\n";
-while($#answers >= 0) {
-    $pos = int rand($#answers);
-    print "$answers[$pos] ($#answers)";
-    $answers[$pos] = $answers[$#answers];
-    delete($answers[$#answers]);
-    <STDIN>;
+@averageTimes, @counts;
+
+while(true) {
+
+    answering();
+
+    #normalisation
+    normalize();
+    
+    #prepare new array
+    prepareQuestions();
+
+    restBreak();
 }
 
-print "Time: " . (`date +%s` - $start) . "\n";
+sub addTimes {
+    my($pos, $time) = @_;
+    if($counts[$pos]) {$averageTimes[$pos] = $averateTimes[$pos] + $time / $counts[$pos];}
+    else {$averageTimes[$pos] = $time;}
+    $counts[$pos]++;
+}
+
+sub answering {
+    print "<question> (<left>)\n";
+    print "<Enter> to continue\n";
+    while($#answers >= 0) {
+	$pos = int rand($#answers);
+	print "$answers[$pos] ($#answers)";
+	$start = `date +%s`;
+	<STDIN>;
+	addTimes($answers[$pos], `date +%s` - $start);
+	$answers[$pos] = $answers[$#answers];
+	delete($answers[$#answers]);
+    }
+}
+
+sub normalize {
+    foreach(@averageTimes) {
+	if($_ < 1) {$_ = 1;}
+	if($_ > 10) {$_ = 10;}
+    }
+    print "(@averageTimes)\n";
+}
+
+sub prepareQuestions {
+    @answers = ();
+    @counts = ();
+    my($sum);
+    for($j = 0; $j <= $#averageTimes; $j++) {
+	#    print "[$j] $times[$j]\n";
+	for($i = 0; $i < $averageTimes[$j]; $i++) {push(@answers, $j);}
+	$sum += $averageTimes[$j];
+    }
+    print "[@answers] ";
+    printf ("%2.1f\n", ($sum/$#averageTimes + 1));
+    @averageTimes = ();
+    $time = `date +%s` - $begin;
+    print "Time: $time\n";
+}
+
+sub restBreak {
+    my $pause = 30;
+    my $delay = 5;
+    for(; $pause > 0; $pause -= $delay) {
+	print "Have a rest break for " . $pause . " s.\n";
+	sleep($delay);
+    }
+    print "\nBegin?\n";
+    <STDIN>;
+}
