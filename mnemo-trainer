@@ -5,6 +5,9 @@ $maximum = 19;
 
 $begin = `date +%s`;
 $start = `date +%s`;
+$tries = 0;
+$stars = 0;
+
 # prepare array
 @tasks;
 # @answers = ('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z');
@@ -43,15 +46,26 @@ sub addTimes {
 sub answering {
     print "<question> (<left>)\n";
     print "<Enter> to continue\n";
+    my $strike;
+    if($#questions > 100) {$strike = 100;}
+    else {$strike = $#questions;}
     while($#questions >= 0) {
-	$pos = int rand($#questions);
-	print "[$#questions] ";
-	print "$tasks[$questions[$pos]]";
-	$start = `date +%s`;
-	<STDIN>;
-	addTimes($questions[$pos], `date +%s` - $start);
-	$questions[$pos] = $questions[$#answers];
-	delete($questions[$#answers]);
+	if($strike >= 0) {
+	    $pos = int rand($#questions);
+	    print "[$strike/$#questions] ";
+	    print "$tasks[$questions[$pos]]";
+	    $start = `date +%s`;
+	    <STDIN>;
+	    addTimes($questions[$pos], `date +%s` - $start);
+	    $questions[$pos] = $questions[$#answers];
+	    delete($questions[$#answers]);
+	    $strike--;
+	}
+	else {
+	    restBreak();
+	    if($#questions > 100) {$strike = 100;}
+	    else {$strike = $#questions;}
+	}
     }
 }
 
@@ -60,6 +74,7 @@ sub normalize {
 	if($_ < 1) {$_ = 1;}
 	if($_ > 10) {$_ = 10;}
     }
+    $tries++;
 }
 
 sub prepareQuestions {
@@ -73,10 +88,18 @@ sub prepareQuestions {
 	if($averageTimes[$j] > $max) {$max = $averageTimes[$j];}
     }
     $avr = $sum / ($#averageTimes + 1);
-    printf ("[%2.1f/%1d]\n", $avr, $max);
+    if($avr < 1.51 && $max < 2.01 && $stars < 3) {$stars++;}
+    else {$stars = 0};
+    printf ("[%d %2.1f/%1d] ", $tries, $avr, $max);
+    print "[";
+    for($i = 1; $i <= 3; $i++) {
+	if($i <= $stars) {print "*";}
+	else {print " ";}
+    }
+    print "]\n";
     @averageTimes = ();
     $time = `date +%s` - $begin;
-    print "Time: $time\n";
+    # print "Time: $time\n";
 }
 
 sub restBreak {
