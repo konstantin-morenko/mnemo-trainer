@@ -19,6 +19,10 @@ for($i = 0; $i <= $maximum - $minimum; $i++) {
     $counts[$i] = 1;
 }
 
+opendir (CURDIR, "./");
+while(readdir CURDIR) {
+    if($_ =~ m/\.journal$/) {print "$_\n";}
+}
 print "Input journal file name: ";
 $name = <STDIN>;
 $name =~ s/\n//;
