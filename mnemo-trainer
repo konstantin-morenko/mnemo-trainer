@@ -5,7 +5,7 @@ $maximum = 19;
 
 $begin = `date +%s`;
 $start = `date +%s`;
-$tries = 0;
+@tries;
 $stars = -1;
 
 # prepare array
@@ -78,7 +78,6 @@ sub normalize {
 	if($_ < 1) {$_ = 1;}
 	if($_ > 10) {$_ = 10;}
     }
-    $tries++;
 }
 
 sub prepareQuestions {
@@ -94,7 +93,8 @@ sub prepareQuestions {
     $avr = $sum / ($#averageTimes + 1);
     if($avr < 1.51 && $max < 2.01) {$stars++;}
     else {$stars = 0};
-    printf ("[%d %2.1f/%1d] ", $tries, $avr, $max);
+    $tries[$#tries + 1] = "[$avr, $max]";
+    printf ("[%d %2.2f/%1d] ", $#tries, $avr, $max);
     print "[";
     for($i = 1; $i <= 3; $i++) {
 	if($i <= $stars) {print "*";}
