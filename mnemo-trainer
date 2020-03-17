@@ -6,7 +6,7 @@ $maximum = 19;
 $begin = `date +%s`;
 $start = `date +%s`;
 $tries = 0;
-$stars = 0;
+$stars = -1;
 
 # prepare array
 @tasks;
@@ -55,7 +55,7 @@ sub answering {
 	    print "[$strike/$#questions] ";
 	    print "$tasks[$questions[$pos]]";
 	    $start = `date +%s`;
-	    <STDIN>;
+	    getc(STDIN);
 	    addTimes($questions[$pos], `date +%s` - $start);
 	    $questions[$pos] = $questions[$#answers];
 	    delete($questions[$#answers]);
@@ -88,7 +88,7 @@ sub prepareQuestions {
 	if($averageTimes[$j] > $max) {$max = $averageTimes[$j];}
     }
     $avr = $sum / ($#averageTimes + 1);
-    if($avr < 1.51 && $max < 2.01 && $stars < 3) {$stars++;}
+    if($avr < 1.51 && $max < 2.01) {$stars++;}
     else {$stars = 0};
     printf ("[%d %2.1f/%1d] ", $tries, $avr, $max);
     print "[";
